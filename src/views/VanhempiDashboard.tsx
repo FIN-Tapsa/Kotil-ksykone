@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import type { Asetukset, Kappale, KysymysRaportti, LapsiData, LapsiProfiili } from '../types';
+import type { Asetukset, Kappale, KysymysRaportti, LapsiData, LapsiProfiili, VastausTapahtuma } from '../types';
 import { haeKaikkiKappaleet } from '../content/contentApi';
 import {
   haeAsetukset,
@@ -214,7 +214,15 @@ export function VanhempiDashboard({ onSulje }: Props) {
             const vastaukset = lapsiData.historia.filter(
               (h) => h.aine === drillKappale.aine && h.kappale === drillKappale.kappale,
             );
-            const viimeiset = vastaukset.slice(-10);
+            const kysymysJarjestys = [...drillKappale.tekstiKysymykset, ...drillKappale.kuvaKysymykset].map(
+              (k) => k.id,
+            );
+            const vastauksetPerKysymys = new Map<string, VastausTapahtuma[]>();
+            for (const v of vastaukset) {
+              if (!vastauksetPerKysymys.has(v.kysymysId)) vastauksetPerKysymys.set(v.kysymysId, []);
+              vastauksetPerKysymys.get(v.kysymysId)!.push(v);
+            }
+            const kysymyksetJoihinVastattu = kysymysJarjestys.filter((id) => vastauksetPerKysymys.has(id));
             const vaaratRyhmiteltyina = new Map<string, Map<string, number>>();
             for (const v of vastaukset.filter((v) => !v.oikein)) {
               if (!vaaratRyhmiteltyina.has(v.kysymysTeksti)) vaaratRyhmiteltyina.set(v.kysymysTeksti, new Map());
@@ -233,12 +241,22 @@ export function VanhempiDashboard({ onSulje }: Props) {
             return (
               <>
                 <div class="kortti">
-                  <p class="alaotsikko" style={{ margin: '0 0 6px' }}>
-                    Viimeisimmät vastaukset
+                  <p class="alaotsikko" style={{ margin: '0 0 10px' }}>
+                    Vastaushistoria kysymyksittäin (viimeisimmät 10 per kysymys)
                   </p>
-                  <p style={{ letterSpacing: 3, fontSize: '1.1rem' }}>
-                    {viimeiset.map((v, i) => (v.oikein ? 'O' : 'V') + (i < viimeiset.length - 1 ? ' ' : '')).join('')}
-                  </p>
+                  {kysymyksetJoihinVastattu.length === 0 && <p class="alaotsikko">Ei vielä vastauksia.</p>}
+                  {kysymyksetJoihinVastattu.map((id) => {
+                    const vv = vastauksetPerKysymys.get(id)!;
+                    const viimeiset = vv.slice(-10);
+                    return (
+                      <div key={id} style={{ marginBottom: 10 }}>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{vv[0].kysymysTeksti}</div>
+                        <div style={{ fontSize: '1.1rem', letterSpacing: 2 }}>
+                          {viimeiset.map((v) => (v.oikein ? '✅' : '❌')).join(' ')}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {vaaratRyhmiteltyina.size > 0 && (
