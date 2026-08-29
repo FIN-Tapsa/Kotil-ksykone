@@ -10,7 +10,7 @@ export const MOCK_KAPPALEET: Kappale[] = [
   {
     aine: 'Biologia',
     kappale: '7 - Selkärangattomat',
-    metadata: { luokkaAste: '5lk', nimi: 'Selkärangattomat' },
+    metadata: { luokkaAste: '7lk', nimi: 'Selkärangattomat' },
     tekstiKysymykset: [
       {
         id: 'bio-7-1',
@@ -80,7 +80,7 @@ export const MOCK_KAPPALEET: Kappale[] = [
   {
     aine: 'Historia',
     kappale: '3 - Muinainen Egypti',
-    metadata: { luokkaAste: '5lk', nimi: 'Muinainen Egypti' },
+    metadata: { luokkaAste: '9lk', nimi: 'Muinainen Egypti' },
     tekstiKysymykset: [
       {
         id: 'his-3-1',
@@ -114,4 +114,4 @@ export const MOCK_KAPPALEET: Kappale[] = [
   },
 ];
 
-export const MOCK_LUOKKA_ASTEET = ['1lk', '2lk', '3lk', '4lk', '5lk', '6lk'];
+export const MOCK_LUOKKA_ASTEET = ['1lk', '2lk', '3lk', '4lk', '5lk', '6lk', '7lk', '8lk', '9lk'];

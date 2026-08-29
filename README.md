@@ -18,11 +18,11 @@ Pelattava koko silmukka on toteutettu ja testattu paikallisesti
 - Vanhemman dashboard: yleiskatsaus, per-aine/kappale syväsukellus
   (O/V-historia, väärien vastausten ryhmittely, kategoriakohtainen
   osaaminen), fokusrajoitusten/piilotusten hallinta, raportoidut kysymykset
+- Oikeat Gemini-generoidut hahmokuvat (`public/hahmot/*.png`)
 
 **Puuttuu vielä / ei toteutettu:**
 - Google Drive -integraatio (sisällön luku + tulosten kirjoitus). Kaikki
   data on toistaiseksi `localStorage`:ssa selaimessa.
-- Oikeat hahmokuvat (ks. alla, placeholder-SVG:t käytössä)
 - Rajatut kuvatunnistuskysymysten lähdekuvat (näytetään väliaikaisena
   paikkamerkkinä lajin nimellä)
 
@@ -73,14 +73,12 @@ Tarvitaan Google Cloud -projekti ja OAuth-client-ID:
 Kun tämä on tehty, rakennan `src/drive/`-kerroksen joka korvaa
 mock-datan.
 
-### 2. Hahmokuvat
+### 2. Hahmokuvat ✅ tehty
 
-`gemini-prompti-hahmot.md` (yläkansiossa) sisältää valmiit promptit.
-Kun kuvat on generoitu ja tallennettu, lataa ne Google Driveen
-`/Läksykuulustelu/Hahmot/`-kansioon Drive-integraation valmistuttua,
-TAI pudota ne suoraan `public/hahmot/`-kansioon paikallista kehitystä
-varten samoilla tiedostonimillä (`pesukarhu_neutraali.png` jne.) — vaihda
-tällöin `PAATE`-vakio arvoon `'png'` tiedostossa `src/ui/CharacterAvatar.tsx`.
+Oikeat Gemini-generoidut kuvat (`gemini-prompti-hahmot.md`, yläkansiossa)
+ovat paikoillaan `public/hahmot/*.png`. Kun Drive-integraatio rakennetaan,
+nämä voidaan siirtää sinne asti Driven `/Läksykuulustelu/Hahmot/`-kansioon
+tai jättää mukaan builtiin paikallisiksi assetteiksi — päätetään silloin.
 
 ### 3. GitHub-julkaisu
 

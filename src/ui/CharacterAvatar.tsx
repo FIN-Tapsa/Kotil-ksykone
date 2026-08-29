@@ -6,10 +6,8 @@ interface Props {
   koko?: number;
 }
 
-// Placeholder-hahmot ovat .svg-tiedostoja (ks. scripts/generoi-placeholder-hahmot.mjs).
-// Kun oikeat Gemini-kuvat ladataan Driveen .png-muodossa, vaihda pääte tässä yhdessä
-// paikassa - muu koodi ei tiedä lähteestä mitään.
-const PAATE = 'svg';
+// Oikeat Gemini-generoidut hahmokuvat, ks. gemini-prompti-hahmot.md (yläkansiossa).
+const PAATE = 'png';
 
 export function CharacterAvatar({ hahmo, tunnetila, koko = 140 }: Props) {
   return (
