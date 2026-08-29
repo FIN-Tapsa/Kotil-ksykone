@@ -26,11 +26,27 @@ export function Yhteenveto({
 
   return (
     <div class="naytto">
-      <CharacterAvatar hahmo={hahmo} tunnetila={uudetBadget.length > 0 || hyvaTulos ? 'juhliva' : 'neutraali'} koko={150} />
-      <h1 class="otsikko">
-        {oikein} / {yhteensa} oikein!
-      </h1>
-      {loputonKorkeus !== undefined && <p class="alaotsikko">Kiipesit korkeuteen {loputonKorkeus} 🏔️</p>}
+      <div
+        class="kortti"
+        style={{
+          width: '100%',
+          background: 'var(--paavari)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
+        <CharacterAvatar hahmo={hahmo} tunnetila={uudetBadget.length > 0 || hyvaTulos ? 'juhliva' : 'neutraali'} koko={150} />
+        <h1 class="otsikko" style={{ color: '#fff' }}>
+          {oikein} / {yhteensa} oikein!
+        </h1>
+        {loputonKorkeus !== undefined && (
+          <p class="alaotsikko" style={{ color: 'rgba(255, 255, 255, .85)' }}>
+            Kiipesit korkeuteen {loputonKorkeus} 🏔️
+          </p>
+        )}
+      </div>
 
       {uudetBadget.length > 0 && (
         <div class="kortti" style={{ width: '100%' }}>

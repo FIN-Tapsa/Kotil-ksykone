@@ -234,6 +234,8 @@ export function App() {
           elamat={pelitila?.tyyppi === 'loputon' ? elamat : undefined}
           korkeus={pelitila?.tyyppi === 'loputon' ? korkeus : undefined}
           jarjestys={pelitila?.tyyppi === 'kiinteä' ? `${indeksi + 1}/${kysymysPino.length}` : `Kysymys ${indeksi + 1}`}
+          indeksi={indeksi}
+          yhteensa={pelitila?.tyyppi === 'kiinteä' ? kysymysPino.length : undefined}
         />
       )}
 

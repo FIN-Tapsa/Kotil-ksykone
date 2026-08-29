@@ -9,6 +9,14 @@ interface Props {
   onVaihdaProfiili: () => void;
 }
 
+function aineIkoni(aine: string): string {
+  const t = aine.toLowerCase();
+  if (t.includes('biolog')) return '🌿';
+  if (t.includes('histor')) return '🏺';
+  if (t.includes('äidinkiel') || t.includes('kieli')) return '🔤';
+  return '📘';
+}
+
 export function Aiheenvalinta({ profiili, nakyvatKappaleet, onValitseKappale, onVaihdaProfiili }: Props) {
   const avoimet = nakyvatKappaleet.filter((n) => n.tila !== 'piilotettu');
 
@@ -32,12 +40,32 @@ export function Aiheenvalinta({ profiili, nakyvatKappaleet, onValitseKappale, on
               onClick={() => nk.tila === 'avoin' && onValitseKappale(nk)}
               disabled={nk.tila === 'harmaa'}
             >
-              <div class="alaotsikko" style={{ margin: 0 }}>
-                {nk.kappale.aine}
-              </div>
-              <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{nk.kappale.metadata.nimi}</div>
-              <div class="alaotsikko" style={{ margin: 0 }}>
-                {maara} kysymystä{nk.tila === 'harmaa' ? ' · tälle päivälle pelattu jo tarpeeksi' : ''}
+              <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                <div
+                  style={{
+                    width: 56,
+                    height: 56,
+                    flexShrink: 0,
+                    borderRadius: 20,
+                    background: 'var(--paavari-vaalea, var(--tausta-korostus))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.6rem',
+                    boxShadow: 'inset 0 -4px 8px rgba(122, 88, 196, .18)',
+                  }}
+                >
+                  {aineIkoni(nk.kappale.aine)}
+                </div>
+                <div>
+                  <div class="alaotsikko" style={{ margin: 0, textAlign: 'left' }}>
+                    {nk.kappale.aine}
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{nk.kappale.metadata.nimi}</div>
+                  <div class="alaotsikko" style={{ margin: 0, textAlign: 'left' }}>
+                    {maara} kysymystä{nk.tila === 'harmaa' ? ' · tälle päivälle pelattu jo tarpeeksi' : ''}
+                  </div>
+                </div>
               </div>
             </button>
           );

@@ -14,6 +14,8 @@ interface Props {
   elamat?: number;
   korkeus?: number;
   jarjestys: string; // "3/10" tms. näyttöä varten
+  indeksi?: number; // nykyisen kysymyksen indeksi (0-pohjainen) - edistymispalkkia varten
+  yhteensa?: number; // sarjan pituus kiinteässä pelitilassa (puuttuu loputon-tilassa -> ei palkkia)
 }
 
 export function Kysymysnakyma({
@@ -26,6 +28,8 @@ export function Kysymysnakyma({
   elamat,
   korkeus,
   jarjestys,
+  indeksi,
+  yhteensa,
 }: Props) {
   const [vastattu, setVastattu] = useState<string | null>(null);
   const [viisikymmentaKaytetty, setViisikymmentaKaytetty] = useState(false);
@@ -66,10 +70,25 @@ export function Kysymysnakyma({
       : 'pettynyt'
     : 'miettiva';
 
+  const prosentti =
+    yhteensa && yhteensa > 0 && indeksi !== undefined
+      ? Math.round(((indeksi + 1) / yhteensa) * 100)
+      : undefined;
+
   return (
     <div class="naytto">
+      {prosentti !== undefined && (
+        <div class="vaakarivi" style={{ width: '100%', alignItems: 'center' }}>
+          <div class="edistys">
+            <div class="edistys-taytto" style={{ width: `${prosentti}%` }} />
+          </div>
+          <span class="alaotsikko" style={{ minWidth: 40 }}>
+            {jarjestys}
+          </span>
+        </div>
+      )}
       <div class="vaakarivi" style={{ justifyContent: 'space-between', width: '100%' }}>
-        <span class="alaotsikko">{jarjestys}</span>
+        {prosentti === undefined && <span class="alaotsikko">{jarjestys}</span>}
         {elamat !== undefined && (
           <span>
             {'❤️'.repeat(Math.max(elamat, 0))}

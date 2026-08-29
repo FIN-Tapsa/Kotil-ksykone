@@ -37,7 +37,9 @@ export function ProfiilinValinta({ profiilit, onKirjaudu, onUusiProfiili, onVanh
               setVirhe(undefined);
             }}
           >
-            <CharacterAvatar hahmo={p.hahmo} tunnetila="neutraali" koko={72} />
+            <div class="hahmokeha">
+              <CharacterAvatar hahmo={p.hahmo} tunnetila="neutraali" koko={72} />
+            </div>
             <strong>{p.nimi}</strong>
             <span class="alaotsikko">{p.luokkaAste}</span>
           </div>

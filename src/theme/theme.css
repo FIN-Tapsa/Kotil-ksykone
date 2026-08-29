@@ -1,107 +1,158 @@
-/* Pehmeä, leikkisä pastellimaailma: pyöreät kortit, pehmeät varjot.
-   Neljä väriteemaa vaihdetaan asettamalla data-teema juuri-elementtiin,
-   komponentit eivät koskaan viittaa väreihin suoraan vaan näihin muuttujiin. */
+/* Läksykuulustelu — visuaalinen tyylikerros v2
+   Pehmeä 3D-pastellimaailma: pyöreät kortit, kerroksittaiset varjot, chunky-napit.
+
+   TÄRKEÄÄ: muuttujien ja luokkien nimet ovat samat kuin v1:ssä, joten tämä tiedosto
+   voi korvata vanhan src/theme/theme.css sellaisenaan ilman muutoksia komponentteihin.
+   Uudet muuttujat (--kortti, --paavari-vaalea, --reuna-*, --nosto-*) ovat lisäyksiä.
+
+   Fontit: lisää index.html:n <head>-osaan
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet"> */
 
 :root {
-  --radius-l: 28px;
-  --radius-m: 18px;
-  --radius-s: 12px;
-  --varjo-pehmea: 0 8px 24px rgba(40, 30, 60, 0.12);
-  --varjo-nosto: 0 12px 32px rgba(40, 30, 60, 0.18);
-  --font: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --radius-xl: 46px;
+  --radius-l: 30px;
+  --radius-m: 22px;
+  --radius-s: 16px;
 
-  --teksti: #33293f;
-  --teksti-himmea: #6f6480;
-  --pinta: #ffffff;
-  --oikein: #4caf7d;
-  --vaarin: #e2685f;
+  --font: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --font-otsikko: 'Baloo 2', 'Nunito', system-ui, sans-serif;
+
+  /* Kerroksellinen pehmeä varjo = kortin "massa" */
+  --varjo-pehmea: 0 12px 24px rgba(74, 54, 110, .15), inset 0 -5px 0 rgba(126, 96, 180, .09), inset 0 2px 0 #fff;
+  --varjo-nosto: 0 18px 34px rgba(74, 54, 110, .2), inset 0 -5px 0 rgba(126, 96, 180, .09), inset 0 2px 0 #fff;
+  --varjo-kevyt: 0 6px 14px rgba(74, 54, 110, .12);
+
+  --teksti: #3f3357;
+  --teksti-himmea: #8d80a6;
+  --pinta: #fffaf5;          /* lämmin luonnonvalkoinen kortti */
+  --kortti: var(--pinta);
+  --oikein: #8dc47a;
+  --oikein-tumma: #4a7a3c;
+  --vaarin: #e88a80;
+  --vaarin-tumma: #a8524b;
 }
 
+/* --- Lasten neljä pastelliteemaa --- */
 [data-teema='lila'] {
-  --tausta: #f3ecfb;
-  --tausta-korostus: #e4d4fb;
-  --paavari: #9b6bd6;
-  --paavari-tumma: #7c4dc0;
-  --korostus: #ffd166;
+  --tausta: #ded3f7;
+  --tausta-syva: #e6dcfb;
+  --tausta-korostus: #efe6ff;
+  --paavari: #9b7ede;
+  --paavari-tumma: #7a58c4;
+  --paavari-vaalea: #efe6ff;
+  --korostus: #fbdf9a;
 }
 
 [data-teema='sininen'] {
-  --tausta: #e9f3fd;
-  --tausta-korostus: #d3e9fb;
-  --paavari: #4f9ce0;
-  --paavari-tumma: #2f7cc0;
-  --korostus: #ffd166;
+  --tausta: #cfe2f7;
+  --tausta-syva: #e0eefb;
+  --tausta-korostus: #e3f0fd;
+  --paavari: #6ba6e2;
+  --paavari-tumma: #4180bd;
+  --paavari-vaalea: #e3f0fd;
+  --korostus: #fbdf9a;
 }
 
 [data-teema='keltainen'] {
-  --tausta: #fdf6e3;
-  --tausta-korostus: #fbecc0;
-  --paavari: #e8ad2c;
-  --paavari-tumma: #c98e10;
-  --korostus: #9b6bd6;
+  --tausta: #fbe9c2;
+  --tausta-syva: #fdf3dd;
+  --tausta-korostus: #fdf0d3;
+  --paavari: #e5ae44;
+  --paavari-tumma: #bd881f;
+  --paavari-vaalea: #fdf0d3;
+  --korostus: #9b7ede;
 }
 
 [data-teema='vihrea'] {
-  --tausta: #eaf7ef;
-  --tausta-korostus: #d3edde;
-  --paavari: #52b788;
-  --paavari-tumma: #38966a;
-  --korostus: #ffd166;
+  --tausta: #d2ebda;
+  --tausta-syva: #e4f3e9;
+  --tausta-korostus: #e2f4e9;
+  --paavari: #63bd8f;
+  --paavari-tumma: #3f9a6c;
+  --paavari-vaalea: #e2f4e9;
+  --korostus: #fbdf9a;
 }
 
-* {
-  box-sizing: border-box;
+/* --- Vanhemman oma paletti: viileä liuske, tarkoituksella eri maailma --- */
+[data-teema='aikuinen'] {
+  --tausta: #dde1ea;
+  --tausta-syva: #eceef4;
+  --tausta-korostus: #e6e9f2;
+  --paavari: #5f6b8d;
+  --paavari-tumma: #464f6c;
+  --paavari-vaalea: #e6e9f2;
+  --korostus: #e5ae44;
+  --pinta: #fbfcfe;
+  --varjo-pehmea: 0 10px 20px rgba(50, 60, 90, .13), inset 0 -4px 0 rgba(70, 79, 108, .07), inset 0 2px 0 #fff;
+  --varjo-nosto: 0 16px 28px rgba(50, 60, 90, .18), inset 0 -4px 0 rgba(70, 79, 108, .07), inset 0 2px 0 #fff;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-}
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; min-height: 100%; }
 
 body {
   font-family: var(--font);
-  background: var(--tausta);
+  background: var(--tausta-syva, #e6dcfb);
   color: var(--teksti);
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
 }
 
-#app {
-  min-height: 100vh;
+#app { min-height: 100vh; display: flex; flex-direction: column; }
+
+a { color: var(--paavari-tumma); }
+a:hover { color: var(--teksti); }
+
+button { font-family: inherit; }
+
+/* --- Näyttö = puhelinnäkymän runko, pehmeä pastellilaatta --- */
+.naytto {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  padding: 22px 18px 32px;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  gap: 16px;
+  background: var(--tausta);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 30px 56px rgba(70, 48, 110, .18), inset 0 2px 0 rgba(255, 255, 255, .65);
 }
 
-button {
-  font-family: inherit;
+@media (max-width: 520px) {
+  .naytto { border-radius: 0; box-shadow: none; }
 }
 
+/* --- Napit: kova alareuna + pehmeä maavarjo = kolmiulotteisuus --- */
 .nappi {
   border: none;
   border-radius: var(--radius-m);
   padding: 16px 24px;
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: var(--varjo-pehmea);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-  min-height: 52px;
-}
-
-.nappi:active {
-  transform: scale(0.96);
-  box-shadow: var(--varjo-pehmea);
+  transition: transform .12s ease, box-shadow .12s ease;
+  min-height: 54px;
 }
 
 .nappi-ensisijainen {
   background: var(--paavari);
   color: #fff;
+  box-shadow: 0 6px 0 var(--paavari-tumma), 0 14px 22px rgba(74, 54, 110, .22);
 }
 
 .nappi-toissijainen {
   background: var(--pinta);
   color: var(--paavari-tumma);
+  box-shadow: 0 6px 0 rgba(122, 88, 196, .16), 0 12px 20px rgba(74, 54, 110, .14);
 }
+
+.nappi:active { transform: translateY(4px); }
+.nappi:disabled { opacity: .5; cursor: default; transform: none; }
 
 .kortti {
   background: var(--pinta);
@@ -110,257 +161,240 @@ button {
   padding: 20px;
 }
 
-.kortti-korostettu {
-  background: var(--tausta-korostus);
-}
-
-.naytto {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 16px 32px;
-  max-width: 480px;
-  width: 100%;
-  margin: 0 auto;
-  gap: 16px;
-}
+.kortti-korostettu { background: var(--tausta-korostus); box-shadow: var(--varjo-kevyt); }
 
 .otsikko {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--paavari-tumma);
+  font-family: var(--font-otsikko);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--teksti);
   text-align: center;
-  margin: 8px 0 0;
+  margin: 6px 0 0;
+  line-height: 1.25;
+  text-wrap: pretty;
 }
 
 .alaotsikko {
   color: var(--teksti-himmea);
   text-align: center;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: .95rem;
+  font-weight: 700;
 }
 
-.vastausrivi {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-  width: 100%;
-}
+/* --- Vastausvaihtoehdot --- */
+.vastausrivi { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; }
 
 .vastausnappi {
   background: var(--pinta);
-  border: 2px solid var(--tausta-korostus);
+  border: none;
   border-radius: var(--radius-m);
-  padding: 14px 18px;
+  padding: 18px 20px;
   text-align: left;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: var(--teksti);
   cursor: pointer;
-  box-shadow: var(--varjo-pehmea);
+  box-shadow: 0 7px 0 rgba(122, 88, 196, .16), 0 14px 22px rgba(74, 54, 110, .13);
+  transition: transform .12s ease;
 }
 
-.vastausnappi:active {
-  transform: scale(0.98);
-}
+.vastausnappi:active { transform: translateY(5px); }
 
 .vastausnappi--oikein {
-  background: var(--oikein);
-  border-color: var(--oikein);
-  color: #fff;
+  background: linear-gradient(180deg, #d9f0c9, #bde3a8);
+  color: var(--oikein-tumma);
+  box-shadow: 0 7px 0 #96c67f, 0 14px 22px rgba(74, 54, 110, .16);
 }
 
 .vastausnappi--vaarin {
-  background: var(--vaarin);
-  border-color: var(--vaarin);
-  color: #fff;
+  background: linear-gradient(180deg, #ffdcd8, #f6bdb7);
+  color: var(--vaarin-tumma);
+  box-shadow: 0 7px 0 #dc9a93, 0 14px 22px rgba(74, 54, 110, .16);
 }
 
-.kuvaruudukko {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  width: 100%;
-}
+/* --- Kuvakysymykset --- */
+.kuvaruudukko { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
 
 .kuvaruutu {
   aspect-ratio: 1;
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-l);
   overflow: hidden;
-  border: 3px solid transparent;
+  border: none;
   cursor: pointer;
-  box-shadow: var(--varjo-pehmea);
   background: var(--tausta-korostus);
+  box-shadow: 0 10px 20px rgba(74, 54, 110, .16), inset 0 2px 0 rgba(255, 255, 255, .6);
+  transition: transform .12s ease;
 }
 
-.kuvaruutu img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.kuvaruutu:active { transform: translateY(4px); }
+.kuvaruutu img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.kuvaruutu--oikein { outline: 4px solid var(--oikein); outline-offset: -4px; }
+.kuvaruutu--vaarin { outline: 4px solid var(--vaarin); outline-offset: -4px; opacity: .55; }
 
-.kuvaruutu--oikein {
-  border-color: var(--oikein);
-}
-
-.kuvaruutu--vaarin {
-  border-color: var(--vaarin);
-  opacity: 0.6;
-}
-
+/* --- Hahmo --- */
 .hahmo {
-  width: 140px;
-  height: 140px;
+  display: block;
+  filter: drop-shadow(0 14px 16px rgba(60, 38, 100, .28));
+  animation: hahmo-kellu 4.5s ease-in-out infinite;
 }
 
-.pinorivi {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
+@keyframes hahmo-kellu {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hahmo { animation: none; }
+}
+
+.pinorivi { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* --- Tilastokortit --- */
 .tilastokortti {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   background: var(--pinta);
-  border-radius: var(--radius-m);
+  border-radius: var(--radius-s);
   box-shadow: var(--varjo-pehmea);
   padding: 14px 18px;
-  min-width: 84px;
+  min-width: 88px;
 }
 
-.tilastokortti-luku {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--paavari-tumma);
-}
+.tilastokortti-luku { font-size: 1.45rem; font-weight: 900; color: var(--paavari-tumma); }
+.tilastokortti-teksti { font-size: .74rem; font-weight: 700; color: var(--teksti-himmea); text-align: center; }
 
-.tilastokortti-teksti {
-  font-size: 0.75rem;
-  color: var(--teksti-himmea);
-  text-align: center;
-}
-
+/* --- Raportointi --- */
 .lippu-nappi {
-  background: transparent;
+  background: rgba(255, 255, 255, .6);
   border: none;
+  border-radius: 12px;
+  width: 32px;
+  height: 32px;
   color: var(--teksti-himmea);
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
-  opacity: 0.6;
-  padding: 6px;
+  box-shadow: var(--varjo-kevyt);
+  padding: 0;
 }
 
-.lippu-nappi:hover {
-  opacity: 1;
-}
+.lippu-nappi:hover { background: #fff; }
+.lippu-nappi:disabled { opacity: .5; }
 
-.pin-syote {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
+/* --- PIN --- */
+.pin-syote { display: flex; gap: 10px; justify-content: center; }
 
 .pin-syote input {
-  width: 48px;
-  height: 56px;
+  width: 54px;
+  height: 64px;
   text-align: center;
-  font-size: 1.6rem;
-  border-radius: var(--radius-s);
-  border: 2px solid var(--tausta-korostus);
-  background: var(--pinta);
+  font-family: inherit;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--paavari-tumma);
+  border-radius: 20px;
+  border: none;
+  background: var(--tausta-korostus);
+  box-shadow: inset 0 -4px 0 rgba(122, 88, 196, .14), inset 0 2px 0 #fff;
+  outline: none;
 }
 
+.pin-syote input:focus { background: #fff; box-shadow: 0 0 0 3px var(--paavari); }
+
+/* --- Profiilikortit --- */
 .profiilikortti {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--pinta);
   border-radius: var(--radius-l);
   box-shadow: var(--varjo-pehmea);
-  padding: 16px;
+  padding: 16px 12px 18px;
   cursor: pointer;
-  border: 3px solid transparent;
-  width: 140px;
+  border: none;
+  width: 150px;
+  transition: transform .12s ease;
 }
 
-.profiilikortti:active {
-  transform: scale(0.97);
-}
+.profiilikortti:active { transform: translateY(4px); }
+.profiilikortti--valittu { outline: 3px solid var(--paavari); outline-offset: -3px; }
 
-.profiilikortti--valittu {
-  border-color: var(--paavari);
-}
-
-.vaakarivi {
+/* Hahmokuvan pehmeä kehä profiilikortissa (valinnainen: <div class="hahmokeha">) */
+.hahmokeha {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: var(--tausta-korostus);
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: center;
-  width: 100%;
+  overflow: hidden;
+  box-shadow: inset 0 -6px 12px rgba(122, 88, 196, .18);
 }
+
+.vaakarivi { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%; }
 
 .linkkinappi {
-  background: none;
+  background: rgba(255, 255, 255, .6);
   border: none;
-  color: var(--teksti-himmea);
-  text-decoration: underline;
+  border-radius: 18px;
+  padding: 11px 18px;
+  color: #6f628b;
+  font-weight: 800;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: .88rem;
+  box-shadow: var(--varjo-kevyt);
 }
 
-.elama {
-  font-size: 1.3rem;
+.linkkinappi:hover { background: #fff; }
+
+.elama { font-size: 1.25rem; letter-spacing: 1px; }
+
+.harmaa { filter: grayscale(1); opacity: .55; pointer-events: none; }
+
+/* --- Edistymispalkki (valinnainen: <div class="edistys"><div class="edistys-taytto" style="width:30%"></div></div>) --- */
+.edistys {
+  flex: 1;
+  height: 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .55);
+  box-shadow: inset 0 2px 4px rgba(90, 66, 140, .18);
+  overflow: hidden;
 }
 
-.harmaa {
-  filter: grayscale(1);
-  opacity: 0.5;
-  pointer-events: none;
+.edistys-taytto {
+  height: 100%;
+  border-radius: 8px;
+  background: var(--paavari);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .4);
+  transition: width .3s ease;
 }
 
-.badge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 88px;
-  text-align: center;
-}
+/* --- Mitalit --- */
+.badge { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 92px; text-align: center; }
 
 .badge-ikoni {
-  font-size: 2rem;
-  background: var(--tausta-korostus);
+  font-size: 1.7rem;
+  background: linear-gradient(180deg, #f3e7ff, #dfcbfb);
   border-radius: 50%;
   width: 64px;
   height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: inset 0 -5px 0 rgba(122, 88, 196, .18), 0 8px 14px rgba(74, 54, 110, .16);
 }
 
-.dashboard-osio {
-  width: 100%;
-  max-width: 720px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+/* --- Vanhemman dashboard --- */
+.dashboard-osio { width: 100%; max-width: 720px; display: flex; flex-direction: column; gap: 16px; }
 
-table.ov-taulu {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
+table.ov-taulu { width: 100%; border-collapse: collapse; font-size: .9rem; font-weight: 700; }
 
 table.ov-taulu td, table.ov-taulu th {
-  padding: 8px;
+  padding: 10px 8px;
   text-align: left;
-  border-bottom: 1px solid var(--tausta-korostus);
+  border-bottom: 1px solid rgba(122, 88, 196, .12);
 }

@@ -16,7 +16,7 @@ export function VanhempiKirjautuminen({ oikeaPin, onOnnistui, onPeruuta }: Props
   }
 
   return (
-    <div class="naytto">
+    <div class="naytto" data-teema="aikuinen">
       <h1 class="otsikko">Vanhemman PIN</h1>
       <PinSyote onValmis={tarkista} virhe={virhe} />
       <button class="linkkinappi" onClick={onPeruuta}>

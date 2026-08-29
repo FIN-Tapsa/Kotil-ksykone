@@ -106,7 +106,7 @@ export function VanhempiDashboard({ onSulje }: Props) {
   const drillKappale = kappaleet.find((k) => avain(k.aine, k.kappale) === valittuKappale) ?? null;
 
   return (
-    <div class="naytto" style={{ maxWidth: 720 }}>
+    <div class="naytto" data-teema="aikuinen" style={{ maxWidth: 720 }}>
       <div class="vaakarivi" style={{ justifyContent: 'space-between', width: '100%' }}>
         <h1 class="otsikko" style={{ margin: 0 }}>
           Vanhemman näkymä
