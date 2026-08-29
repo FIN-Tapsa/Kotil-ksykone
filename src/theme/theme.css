@@ -1,0 +1,366 @@
+/* Pehmeä, leikkisä pastellimaailma: pyöreät kortit, pehmeät varjot.
+   Neljä väriteemaa vaihdetaan asettamalla data-teema juuri-elementtiin,
+   komponentit eivät koskaan viittaa väreihin suoraan vaan näihin muuttujiin. */
+
+:root {
+  --radius-l: 28px;
+  --radius-m: 18px;
+  --radius-s: 12px;
+  --varjo-pehmea: 0 8px 24px rgba(40, 30, 60, 0.12);
+  --varjo-nosto: 0 12px 32px rgba(40, 30, 60, 0.18);
+  --font: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+
+  --teksti: #33293f;
+  --teksti-himmea: #6f6480;
+  --pinta: #ffffff;
+  --oikein: #4caf7d;
+  --vaarin: #e2685f;
+}
+
+[data-teema='lila'] {
+  --tausta: #f3ecfb;
+  --tausta-korostus: #e4d4fb;
+  --paavari: #9b6bd6;
+  --paavari-tumma: #7c4dc0;
+  --korostus: #ffd166;
+}
+
+[data-teema='sininen'] {
+  --tausta: #e9f3fd;
+  --tausta-korostus: #d3e9fb;
+  --paavari: #4f9ce0;
+  --paavari-tumma: #2f7cc0;
+  --korostus: #ffd166;
+}
+
+[data-teema='keltainen'] {
+  --tausta: #fdf6e3;
+  --tausta-korostus: #fbecc0;
+  --paavari: #e8ad2c;
+  --paavari-tumma: #c98e10;
+  --korostus: #9b6bd6;
+}
+
+[data-teema='vihrea'] {
+  --tausta: #eaf7ef;
+  --tausta-korostus: #d3edde;
+  --paavari: #52b788;
+  --paavari-tumma: #38966a;
+  --korostus: #ffd166;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--tausta);
+  color: var(--teksti);
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+}
+
+.nappi {
+  border: none;
+  border-radius: var(--radius-m);
+  padding: 16px 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--varjo-pehmea);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  min-height: 52px;
+}
+
+.nappi:active {
+  transform: scale(0.96);
+  box-shadow: var(--varjo-pehmea);
+}
+
+.nappi-ensisijainen {
+  background: var(--paavari);
+  color: #fff;
+}
+
+.nappi-toissijainen {
+  background: var(--pinta);
+  color: var(--paavari-tumma);
+}
+
+.kortti {
+  background: var(--pinta);
+  border-radius: var(--radius-l);
+  box-shadow: var(--varjo-pehmea);
+  padding: 20px;
+}
+
+.kortti-korostettu {
+  background: var(--tausta-korostus);
+}
+
+.naytto {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px 32px;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  gap: 16px;
+}
+
+.otsikko {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--paavari-tumma);
+  text-align: center;
+  margin: 8px 0 0;
+}
+
+.alaotsikko {
+  color: var(--teksti-himmea);
+  text-align: center;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.vastausrivi {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.vastausnappi {
+  background: var(--pinta);
+  border: 2px solid var(--tausta-korostus);
+  border-radius: var(--radius-m);
+  padding: 14px 18px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--teksti);
+  cursor: pointer;
+  box-shadow: var(--varjo-pehmea);
+}
+
+.vastausnappi:active {
+  transform: scale(0.98);
+}
+
+.vastausnappi--oikein {
+  background: var(--oikein);
+  border-color: var(--oikein);
+  color: #fff;
+}
+
+.vastausnappi--vaarin {
+  background: var(--vaarin);
+  border-color: var(--vaarin);
+  color: #fff;
+}
+
+.kuvaruudukko {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.kuvaruutu {
+  aspect-ratio: 1;
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  border: 3px solid transparent;
+  cursor: pointer;
+  box-shadow: var(--varjo-pehmea);
+  background: var(--tausta-korostus);
+}
+
+.kuvaruutu img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.kuvaruutu--oikein {
+  border-color: var(--oikein);
+}
+
+.kuvaruutu--vaarin {
+  border-color: var(--vaarin);
+  opacity: 0.6;
+}
+
+.hahmo {
+  width: 140px;
+  height: 140px;
+}
+
+.pinorivi {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tilastokortti {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--pinta);
+  border-radius: var(--radius-m);
+  box-shadow: var(--varjo-pehmea);
+  padding: 14px 18px;
+  min-width: 84px;
+}
+
+.tilastokortti-luku {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--paavari-tumma);
+}
+
+.tilastokortti-teksti {
+  font-size: 0.75rem;
+  color: var(--teksti-himmea);
+  text-align: center;
+}
+
+.lippu-nappi {
+  background: transparent;
+  border: none;
+  color: var(--teksti-himmea);
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 6px;
+}
+
+.lippu-nappi:hover {
+  opacity: 1;
+}
+
+.pin-syote {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.pin-syote input {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-size: 1.6rem;
+  border-radius: var(--radius-s);
+  border: 2px solid var(--tausta-korostus);
+  background: var(--pinta);
+}
+
+.profiilikortti {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--pinta);
+  border-radius: var(--radius-l);
+  box-shadow: var(--varjo-pehmea);
+  padding: 16px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  width: 140px;
+}
+
+.profiilikortti:active {
+  transform: scale(0.97);
+}
+
+.profiilikortti--valittu {
+  border-color: var(--paavari);
+}
+
+.vaakarivi {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.linkkinappi {
+  background: none;
+  border: none;
+  color: var(--teksti-himmea);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.elama {
+  font-size: 1.3rem;
+}
+
+.harmaa {
+  filter: grayscale(1);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 88px;
+  text-align: center;
+}
+
+.badge-ikoni {
+  font-size: 2rem;
+  background: var(--tausta-korostus);
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-osio {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+table.ov-taulu {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+table.ov-taulu td, table.ov-taulu th {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--tausta-korostus);
+}
