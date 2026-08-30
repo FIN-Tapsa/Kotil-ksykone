@@ -1,11 +1,14 @@
-// Sisältörajapinta. V1 lukee MOCK_KAPPALEET-taulukosta; kun Drive-integraatio
-// rakennetaan, tässä tiedostossa vaihdetaan lähde Drive-API-kutsuihin - kutsujien
-// (näkymien) ei tarvitse muuttua, koska ne käyttävät vain näitä funktioita.
-import { MOCK_KAPPALEET } from './mockContent';
+// Sisältörajapinta. V1 lukee REAL_KAPPALEET-taulukosta (oikea, kirjan sivuilta
+// generoitu sisältö); kun Drive-integraatio rakennetaan, tässä tiedostossa
+// vaihdetaan lähde Drive-API-kutsuihin - kutsujien (näkymien) ei tarvitse
+// muuttua, koska ne käyttävät vain näitä funktioita.
+// (mockContent.ts:n placeholder-data säilyy kehityksen/testauksen referenssinä,
+// mutta ei ole enää live-polussa.)
+import { REAL_KAPPALEET } from './realContent';
 import type { Asetukset, Kappale, LapsiData } from '../types';
 
 export async function haeKaikkiKappaleet(): Promise<Kappale[]> {
-  return MOCK_KAPPALEET;
+  return REAL_KAPPALEET;
 }
 
 export interface NakyvaKappale {
