@@ -1,8 +1,8 @@
 import { useState } from 'preact/hooks';
-import type { HahmoNimi, Kysymys } from '../types';
+import type { HahmoNimi, KuvaKysymys, Kysymys } from '../types';
 import { kayta5050, kuvaVaihtoehdot, tekstiVaihtoehdot, type KuvaVaihtoehto, type Vaihtoehto } from '../game/engine';
 import { CharacterAvatar } from '../ui/CharacterAvatar';
-import { PlaceholderKuva } from '../ui/PlaceholderKuva';
+import { KuvaTunnistusKuva } from '../ui/KuvaTunnistusKuva';
 
 interface Props {
   kysymys: Kysymys;
@@ -16,6 +16,9 @@ interface Props {
   jarjestys: string; // "3/10" tms. näyttöä varten
   indeksi?: number; // nykyisen kysymyksen indeksi (0-pohjainen) - edistymispalkkia varten
   yhteensa?: number; // sarjan pituus kiinteässä pelitilassa (puuttuu loputon-tilassa -> ei palkkia)
+  kappaleenKuvaKysymykset: KuvaKysymys[]; // koko kappaleen kuvakysymykset - jotta neljä_kuvaa
+  // -ruudukon vääristä vaihtoehdoista löydetään NIIDEN OMA kuva (jokaisella lajilla on oma
+  // kuva_tunnistus-kysymyksensä samassa kappaleessa, josta kuvatiedosto löytyy id:n kautta).
 }
 
 export function Kysymysnakyma({
@@ -30,7 +33,9 @@ export function Kysymysnakyma({
   jarjestys,
   indeksi,
   yhteensa,
+  kappaleenKuvaKysymykset,
 }: Props) {
+  const kuvaIdPerLaji = new Map(kappaleenKuvaKysymykset.map((k) => [k.laji, k.id]));
   const [vastattu, setVastattu] = useState<string | null>(null);
   const [viisikymmentaKaytetty, setViisikymmentaKaytetty] = useState(false);
   const [raportoitu, setRaportoitu] = useState(false);
@@ -127,7 +132,7 @@ export function Kysymysnakyma({
         <>
           <p class="alaotsikko">Tunnista:</p>
           <div class="kortti" style={{ width: 200, height: 200, padding: 0, overflow: 'hidden' }}>
-            <PlaceholderKuva laji={kysymys.laji} kategoria={kysymys.kategoria} />
+            <KuvaTunnistusKuva kysymysId={kysymys.id} laji={kysymys.laji} kategoria={kysymys.kategoria} />
           </div>
           <div class="vastausrivi">
             {naytettavatKuva.map((v) => (
@@ -160,7 +165,11 @@ export function Kysymysnakyma({
                 onClick={() => valitse(v.nimi, v.oikea)}
                 disabled={!!vastattu}
               >
-                <PlaceholderKuva laji={v.nimi} kategoria={kysymys.kategoria} />
+                <KuvaTunnistusKuva
+                  kysymysId={kuvaIdPerLaji.get(v.nimi) ?? kysymys.id}
+                  laji={v.nimi}
+                  kategoria={kysymys.kategoria}
+                />
               </button>
             ))}
           </div>
