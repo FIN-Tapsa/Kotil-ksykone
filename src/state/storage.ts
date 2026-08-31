@@ -1,34 +1,28 @@
-// Tallennuskerroksen rajapinta. V1: localStorage (toimii heti, ei vaadi Drive-kirjautumista
-// kehityksen aikana). Kun Drive-integraatio rakennetaan, tämä tiedosto korvataan
-// drive.ts-toteutuksella jolla on SAMA rajapinta (get/set async-funktiot) - mikään muu
-// koodi ei muutu, koska kaikki muu käyttää vain näitä funktioita.
+// Tallennuskerros. Firestore-pohjainen (ks. firebase.ts) - data on jaettu KAIKKIEN
+// perheen laitteiden kesken (ei enää laitekohtainen localStorage). Rajapinta
+// (funktioiden nimet/signatuurit) on sama kuin aiemmassa localStorage-versiossa,
+// joten mikään näkymä ei tiedä/välitä mistä data oikeasti tulee.
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore';
+import { db, varmistaKirjautuminen } from './firebase';
 import type { Asetukset, KysymysRaportti, LapsiData, LapsiProfiili } from '../types';
 
-const AVAIN_PROFIILIT = 'laksykuulustelu:profiilit';
-const AVAIN_ASETUKSET = 'laksykuulustelu:asetukset';
-const AVAIN_DATA_PREFIX = 'laksykuulustelu:data:';
-const AVAIN_RAPORTIT = 'laksykuulustelu:raportit';
-
-function lueJson<T>(avain: string, oletus: T): T {
-  try {
-    const raaka = localStorage.getItem(avain);
-    if (!raaka) return oletus;
-    return JSON.parse(raaka) as T;
-  } catch {
-    return oletus;
-  }
-}
-
-function kirjoitaJson<T>(avain: string, arvo: T): void {
-  localStorage.setItem(avain, JSON.stringify(arvo));
-}
-
 export async function haeProfiilit(): Promise<LapsiProfiili[]> {
-  return lueJson(AVAIN_PROFIILIT, []);
+  await varmistaKirjautuminen();
+  const snap = await getDocs(collection(db, 'profiilit'));
+  return snap.docs.map((d) => d.data() as LapsiProfiili);
 }
 
 export async function tallennaProfiilit(profiilit: LapsiProfiili[]): Promise<void> {
-  kirjoitaJson(AVAIN_PROFIILIT, profiilit);
+  await varmistaKirjautuminen();
+  await Promise.all(profiilit.map((p) => setDoc(doc(db, 'profiilit', p.id), p)));
 }
 
 const OLETUS_ASETUKSET: Asetukset = {
@@ -38,12 +32,17 @@ const OLETUS_ASETUKSET: Asetukset = {
   piilotetutKappaleet: [],
 };
 
+const ASETUKSET_DOC_ID = 'perhe';
+
 export async function haeAsetukset(): Promise<Asetukset> {
-  return lueJson(AVAIN_ASETUKSET, OLETUS_ASETUKSET);
+  await varmistaKirjautuminen();
+  const snap = await getDoc(doc(db, 'asetukset', ASETUKSET_DOC_ID));
+  return snap.exists() ? (snap.data() as Asetukset) : OLETUS_ASETUKSET;
 }
 
 export async function tallennaAsetukset(asetukset: Asetukset): Promise<void> {
-  kirjoitaJson(AVAIN_ASETUKSET, asetukset);
+  await varmistaKirjautuminen();
+  await setDoc(doc(db, 'asetukset', ASETUKSET_DOC_ID), asetukset);
 }
 
 function oletusLapsiData(profiiliId: string): LapsiData {
@@ -57,28 +56,35 @@ function oletusLapsiData(profiiliId: string): LapsiData {
 }
 
 export async function haeLapsiData(profiiliId: string): Promise<LapsiData> {
-  return lueJson(AVAIN_DATA_PREFIX + profiiliId, oletusLapsiData(profiiliId));
+  await varmistaKirjautuminen();
+  const snap = await getDoc(doc(db, 'lapsidata', profiiliId));
+  return snap.exists() ? (snap.data() as LapsiData) : oletusLapsiData(profiiliId);
 }
 
 export async function tallennaLapsiData(data: LapsiData): Promise<void> {
-  kirjoitaJson(AVAIN_DATA_PREFIX + data.profiiliId, data);
+  await varmistaKirjautuminen();
+  await setDoc(doc(db, 'lapsidata', data.profiiliId), data);
 }
 
 export async function haeRaportit(): Promise<KysymysRaportti[]> {
-  return lueJson(AVAIN_RAPORTIT, []);
+  await varmistaKirjautuminen();
+  const snap = await getDocs(collection(db, 'raportit'));
+  return snap.docs.map((d) => d.data() as KysymysRaportti);
 }
 
 export async function lisaaRaportti(raportti: KysymysRaportti): Promise<void> {
-  const nykyiset = await haeRaportit();
-  kirjoitaJson(AVAIN_RAPORTIT, [...nykyiset, raportti]);
+  await varmistaKirjautuminen();
+  await addDoc(collection(db, 'raportit'), raportti);
 }
 
 export async function merkitseRaporttiKasitellyksi(kysymysId: string, profiiliNimi: string): Promise<void> {
-  const nykyiset = await haeRaportit();
-  kirjoitaJson(
-    AVAIN_RAPORTIT,
-    nykyiset.map((r) =>
-      r.kysymysId === kysymysId && r.profiiliNimi === profiiliNimi ? { ...r, kasitelty: true } : r,
-    ),
-  );
+  await varmistaKirjautuminen();
+  const snap = await getDocs(collection(db, 'raportit'));
+  const paivitykset = snap.docs
+    .filter((d) => {
+      const r = d.data() as KysymysRaportti;
+      return r.kysymysId === kysymysId && r.profiiliNimi === profiiliNimi;
+    })
+    .map((d) => updateDoc(d.ref, { kasitelty: true }));
+  await Promise.all(paivitykset);
 }
