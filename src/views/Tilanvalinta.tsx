@@ -1,18 +1,23 @@
 import type { Kappale, Pelitila } from '../types';
 
 interface Props {
-  kappale: Kappale;
+  kappaleet: Kappale[]; // yksi tai useampi valittu kappale (sama aine)
   onValitse: (tila: Pelitila) => void;
   onTakaisin: () => void;
 }
 
-export function Tilanvalinta({ kappale, onValitse, onTakaisin }: Props) {
-  const maara = kappale.tekstiKysymykset.length + kappale.kuvaKysymykset.length;
+export function Tilanvalinta({ kappaleet, onValitse, onTakaisin }: Props) {
+  const maara = kappaleet.reduce((s, k) => s + k.tekstiKysymykset.length + k.kuvaKysymykset.length, 0);
+  const otsikko =
+    kappaleet.length === 1 ? kappaleet[0].metadata.nimi : `${kappaleet.length} kappaletta valittu`;
 
   return (
     <div class="naytto">
-      <h1 class="otsikko">{kappale.metadata.nimi}</h1>
-      <p class="alaotsikko">Valitse pelitila</p>
+      <h1 class="otsikko">{otsikko}</h1>
+      {kappaleet.length > 1 && (
+        <p class="alaotsikko">{kappaleet.map((k) => k.metadata.nimi).join(' · ')}</p>
+      )}
+      <p class="alaotsikko">Valitse pelitila ({maara} kysymystä yhteensä saatavilla)</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
         {[5, 10, 15].map((n) => (
@@ -31,7 +36,7 @@ export function Tilanvalinta({ kappale, onValitse, onTakaisin }: Props) {
       </div>
 
       <button class="linkkinappi" onClick={onTakaisin}>
-        Vaihda aihetta
+        Vaihda kappaletta
       </button>
     </div>
   );

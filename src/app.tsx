@@ -3,7 +3,7 @@ import './theme/theme.css';
 import type { Asetukset, Kappale, KuvaKysymys, Kysymys, LapsiData, LapsiProfiili, Pelitila, TekstiKysymys, VastausTapahtuma } from './types';
 import { haeKaikkiKappaleet, kirjaaFokusKierros, suodataNakyvatKappaleet } from './content/contentApi';
 import { haeAsetukset, haeLapsiData, haeProfiilit, lisaaRaportti, tallennaLapsiData, tallennaProfiilit } from './state/storage';
-import { ALKUELAMAT_LOPUTON, JOKEREITA_PER_SESSIO, rakennaKysymysPino } from './game/engine';
+import { ALKUELAMAT_LOPUTON, JOKEREITA_PER_SESSIO, rakennaKysymysPino, type KysymysLahteet } from './game/engine';
 import { tarkistaBadget, type SessioTulos } from './game/badges';
 import type { Badge } from './types';
 
@@ -11,7 +11,8 @@ import { ProfiilinValinta } from './views/ProfiilinValinta';
 import { ProfiilinLuonti } from './views/ProfiilinLuonti';
 import { VanhempiKirjautuminen } from './views/VanhempiKirjautuminen';
 import { VanhempiDashboard } from './views/VanhempiDashboard';
-import { Aiheenvalinta } from './views/Aiheenvalinta';
+import { Ainevalinta } from './views/Ainevalinta';
+import { Kappaleenvalinta } from './views/Kappaleenvalinta';
 import { Tilanvalinta } from './views/Tilanvalinta';
 import { Kysymysnakyma } from './views/Kysymysnakyma';
 import { Yhteenveto } from './views/Yhteenveto';
@@ -22,7 +23,8 @@ type Nakyma =
   | 'profiilinluonti'
   | 'vanhempikirjautuminen'
   | 'vanhempidashboard'
-  | 'aiheenvalinta'
+  | 'ainevalinta'
+  | 'kappaleenvalinta'
   | 'tilanvalinta'
   | 'kysymys'
   | 'yhteenveto';
@@ -40,9 +42,13 @@ export function App() {
   const [aktiiviProfiili, setAktiiviProfiili] = useState<LapsiProfiili | null>(null);
   const [lapsiData, setLapsiData] = useState<LapsiData | null>(null);
 
-  const [valittuKappale, setValittuKappale] = useState<Kappale | null>(null);
+  const [valittuAine, setValittuAine] = useState<string | null>(null);
+  // Yksi tai useampi kappale voi olla valittuna kerralla (esim. laajempi koealue) -
+  // kaikki valitut kappaleet ovat aina samasta aineesta, koska aine valitaan ensin.
+  const [valitutKappaleet, setValitutKappaleet] = useState<Kappale[]>([]);
   const [pelitila, setPelitila] = useState<Pelitila | null>(null);
   const [kysymysPino, setKysymysPino] = useState<Kysymys[]>([]);
+  const [kysymysLahteet, setKysymysLahteet] = useState<KysymysLahteet>({});
   const [indeksi, setIndeksi] = useState(0);
   const [sessioVastaukset, setSessioVastaukset] = useState<VastausTapahtuma[]>([]);
   const [elamat, setElamat] = useState(ALKUELAMAT_LOPUTON);
@@ -63,7 +69,7 @@ export function App() {
   async function kirjaudu(profiili: LapsiProfiili) {
     setAktiiviProfiili(profiili);
     setLapsiData(await haeLapsiData(profiili.id));
-    setNakyma('aiheenvalinta');
+    setNakyma('ainevalinta');
   }
 
   async function luoProfiili(profiili: LapsiProfiili) {
@@ -73,11 +79,13 @@ export function App() {
     await kirjaudu(profiili);
   }
 
-  function aloitaSessio(kappale: Kappale, tila: Pelitila) {
-    setValittuKappale(kappale);
+  function aloitaSessio(kappaleet: Kappale[], tila: Pelitila) {
+    setValitutKappaleet(kappaleet);
     setPelitila(tila);
     const maara = tila.tyyppi === 'kiinteä' ? tila.maara : undefined;
-    setKysymysPino(rakennaKysymysPino(kappale, maara));
+    const { pino, lahteet } = rakennaKysymysPino(kappaleet, maara);
+    setKysymysPino(pino);
+    setKysymysLahteet(lahteet);
     setIndeksi(0);
     setSessioVastaukset([]);
     setElamat(ALKUELAMAT_LOPUTON);
@@ -87,28 +95,36 @@ export function App() {
   }
 
   async function paataSessio(vastaukset: VastausTapahtuma[], loputonKorkeus?: number) {
-    if (!lapsiData || !valittuKappale || !pelitila) return;
+    if (!lapsiData || valitutKappaleet.length === 0 || !pelitila) return;
     const tulos: SessioTulos = {
-      aine: valittuKappale.aine,
-      kappale: valittuKappale.kappale,
+      aine: valitutKappaleet[0].aine,
+      kappale: valitutKappaleet.map((k) => k.kappale).join(' + '),
       vastaukset,
       pelitilaTyyppi: pelitila.tyyppi,
       loputonKorkeus,
     };
     const { data, uudet } = tarkistaBadget(lapsiData, tulos);
-    const dataFokusPaivitetty = kirjaaFokusKierros(data, valittuKappale.aine, valittuKappale.kappale);
+    let dataFokusPaivitetty = data;
+    for (const k of valitutKappaleet) {
+      dataFokusPaivitetty = kirjaaFokusKierros(dataFokusPaivitetty, k.aine, k.kappale);
+    }
     setLapsiData(dataFokusPaivitetty);
     await tallennaLapsiData(dataFokusPaivitetty);
     setUudetBadget(uudet);
     setNakyma('yhteenveto');
   }
 
+  function lahdeKysymykselle(kysymysId: string) {
+    return kysymysLahteet[kysymysId] ?? { aine: valitutKappaleet[0]?.aine ?? '', kappale: valitutKappaleet[0]?.kappale ?? '' };
+  }
+
   function kasitteleVastaus(kysymys: Kysymys, oikein: boolean, valittuTeksti: string) {
-    if (!valittuKappale) return;
+    if (valitutKappaleet.length === 0) return;
+    const lahde = lahdeKysymykselle(kysymys.id);
     const tapahtuma: VastausTapahtuma = {
       aika: new Date().toISOString(),
-      aine: valittuKappale.aine,
-      kappale: valittuKappale.kappale,
+      aine: lahde.aine,
+      kappale: lahde.kappale,
       kysymysId: kysymys.id,
       kysymysTeksti: kysymysTeksti(kysymys),
       oikein,
@@ -128,8 +144,8 @@ export function App() {
       }
       const seuraavaIndeksi = indeksi + 1;
       if (seuraavaIndeksi >= kysymysPino.length) {
-        // kysymyspino loppui - sekoitetaan sama kappale uudestaan jatkoa varten
-        setKysymysPino(rakennaKysymysPino(valittuKappale));
+        // kysymyspino loppui - sekoitetaan samat kappaleet uudestaan jatkoa varten
+        setKysymysPino(rakennaKysymysPino(valitutKappaleet).pino);
         setIndeksi(0);
       } else {
         setIndeksi(seuraavaIndeksi);
@@ -145,11 +161,12 @@ export function App() {
   }
 
   async function raportoiKysymys(kysymysId: string) {
-    if (!aktiiviProfiili || !valittuKappale) return;
+    if (!aktiiviProfiili || valitutKappaleet.length === 0) return;
+    const lahde = lahdeKysymykselle(kysymysId);
     await lisaaRaportti({
       kysymysId,
-      aine: valittuKappale.aine,
-      kappale: valittuKappale.kappale,
+      aine: lahde.aine,
+      kappale: lahde.kappale,
       profiiliNimi: aktiiviProfiili.nimi,
       aika: new Date().toISOString(),
       kasitelty: false,
@@ -199,13 +216,13 @@ export function App() {
         />
       )}
 
-      {nakyma === 'aiheenvalinta' && aktiiviProfiili && asetukset && lapsiData && (
-        <Aiheenvalinta
+      {nakyma === 'ainevalinta' && aktiiviProfiili && asetukset && lapsiData && (
+        <Ainevalinta
           profiili={aktiiviProfiili}
           nakyvatKappaleet={suodataNakyvatKappaleet(kaikkiKappaleet, aktiiviProfiili.luokkaAste, asetukset, lapsiData)}
-          onValitseKappale={(nk) => {
-            setValittuKappale(nk.kappale);
-            setNakyma('tilanvalinta');
+          onValitseAine={(aine) => {
+            setValittuAine(aine);
+            setNakyma('kappaleenvalinta');
           }}
           onVaihdaProfiili={() => {
             setAktiiviProfiili(null);
@@ -214,11 +231,23 @@ export function App() {
         />
       )}
 
-      {nakyma === 'tilanvalinta' && valittuKappale && (
+      {nakyma === 'kappaleenvalinta' && valittuAine && asetukset && lapsiData && aktiiviProfiili && (
+        <Kappaleenvalinta
+          aine={valittuAine}
+          nakyvatKappaleet={suodataNakyvatKappaleet(kaikkiKappaleet, aktiiviProfiili.luokkaAste, asetukset, lapsiData)}
+          onJatka={(kappaleet) => {
+            setValitutKappaleet(kappaleet);
+            setNakyma('tilanvalinta');
+          }}
+          onTakaisin={() => setNakyma('ainevalinta')}
+        />
+      )}
+
+      {nakyma === 'tilanvalinta' && valitutKappaleet.length > 0 && (
         <Tilanvalinta
-          kappale={valittuKappale}
-          onValitse={(tila) => aloitaSessio(valittuKappale, tila)}
-          onTakaisin={() => setNakyma('aiheenvalinta')}
+          kappaleet={valitutKappaleet}
+          onValitse={(tila) => aloitaSessio(valitutKappaleet, tila)}
+          onTakaisin={() => setNakyma('kappaleenvalinta')}
         />
       )}
 
@@ -236,7 +265,7 @@ export function App() {
           jarjestys={pelitila?.tyyppi === 'kiinteä' ? `${indeksi + 1}/${kysymysPino.length}` : `Kysymys ${indeksi + 1}`}
           indeksi={indeksi}
           yhteensa={pelitila?.tyyppi === 'kiinteä' ? kysymysPino.length : undefined}
-          kappaleenKuvaKysymykset={valittuKappale?.kuvaKysymykset ?? []}
+          kappaleenKuvaKysymykset={valitutKappaleet.flatMap((k) => k.kuvaKysymykset)}
         />
       )}
 
@@ -247,8 +276,8 @@ export function App() {
           uudetBadget={uudetBadget}
           loputonKorkeus={pelitila?.tyyppi === 'loputon' ? korkeus : undefined}
           onRaportoi={raportoiKysymys}
-          onUudestaan={() => valittuKappale && pelitila && aloitaSessio(valittuKappale, pelitila)}
-          onValitseToinenAihe={() => setNakyma('aiheenvalinta')}
+          onUudestaan={() => valitutKappaleet.length > 0 && pelitila && aloitaSessio(valitutKappaleet, pelitila)}
+          onValitseToinenAihe={() => setNakyma('ainevalinta')}
         />
       )}
     </div>

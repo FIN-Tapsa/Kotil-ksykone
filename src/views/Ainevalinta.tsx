@@ -1,44 +1,39 @@
 import type { LapsiProfiili } from '../types';
 import type { NakyvaKappale } from '../content/contentApi';
 import { CharacterAvatar } from '../ui/CharacterAvatar';
+import { aineIkoni } from '../ui/aineIkoni';
 
 interface Props {
   profiili: LapsiProfiili;
   nakyvatKappaleet: NakyvaKappale[];
-  onValitseKappale: (nk: NakyvaKappale) => void;
+  onValitseAine: (aine: string) => void;
   onVaihdaProfiili: () => void;
 }
 
-function aineIkoni(aine: string): string {
-  const t = aine.toLowerCase();
-  if (t.includes('biolog')) return '🌿';
-  if (t.includes('histor')) return '🏺';
-  if (t.includes('äidinkiel') || t.includes('kieli')) return '🔤';
-  return '📘';
-}
-
-export function Aiheenvalinta({ profiili, nakyvatKappaleet, onValitseKappale, onVaihdaProfiili }: Props) {
-  const avoimet = nakyvatKappaleet.filter((n) => n.tila !== 'piilotettu');
+// Ensimmäinen vaihe: valitaan aine. Kappalevalinta (mahdollisesti useampi
+// kappale kerralla) tapahtuu seuraavassa näkymässä (Kappaleenvalinta.tsx).
+export function Ainevalinta({ profiili, nakyvatKappaleet, onValitseAine, onVaihdaProfiili }: Props) {
+  const naytettavat = nakyvatKappaleet.filter((n) => n.tila !== 'piilotettu');
+  const aineet = [...new Set(naytettavat.map((n) => n.kappale.aine))];
 
   return (
     <div class="naytto">
       <CharacterAvatar hahmo={profiili.hahmo} tunnetila="neutraali" koko={100} />
-      <h1 class="otsikko">Hei {profiili.nimi}! Mitä harjoitellaan?</h1>
+      <h1 class="otsikko">Hei {profiili.nimi}! Mitä ainetta harjoitellaan?</h1>
 
-      {avoimet.length === 0 && (
+      {aineet.length === 0 && (
         <p class="alaotsikko">Ei vielä sisältöä {profiili.luokkaAste}:lle. Pyydä vanhempaa lisäämään kappaleita.</p>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
-        {avoimet.map((nk) => {
-          const maara = nk.kappale.tekstiKysymykset.length + nk.kappale.kuvaKysymykset.length;
+        {aineet.map((aine) => {
+          const kappaleitaYhteensa = naytettavat.filter((n) => n.kappale.aine === aine).length;
           return (
             <button
-              key={nk.kappale.aine + nk.kappale.kappale}
-              class={`kortti ${nk.tila === 'harmaa' ? 'harmaa' : ''}`}
+              key={aine}
+              class="kortti"
               style={{ textAlign: 'left', cursor: 'pointer', border: 'none', width: '100%' }}
-              onClick={() => nk.tila === 'avoin' && onValitseKappale(nk)}
-              disabled={nk.tila === 'harmaa'}
+              onClick={() => onValitseAine(aine)}
             >
               <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                 <div
@@ -55,15 +50,12 @@ export function Aiheenvalinta({ profiili, nakyvatKappaleet, onValitseKappale, on
                     boxShadow: 'inset 0 -4px 8px rgba(122, 88, 196, .18)',
                   }}
                 >
-                  {aineIkoni(nk.kappale.aine)}
+                  {aineIkoni(aine)}
                 </div>
                 <div>
+                  <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{aine}</div>
                   <div class="alaotsikko" style={{ margin: 0, textAlign: 'left' }}>
-                    {nk.kappale.aine}
-                  </div>
-                  <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{nk.kappale.metadata.nimi}</div>
-                  <div class="alaotsikko" style={{ margin: 0, textAlign: 'left' }}>
-                    {maara} kysymystä{nk.tila === 'harmaa' ? ' · tälle päivälle pelattu jo tarpeeksi' : ''}
+                    {kappaleitaYhteensa} {kappaleitaYhteensa === 1 ? 'kappale' : 'kappaletta'}
                   </div>
                 </div>
               </div>

@@ -12,11 +12,38 @@ function sekoita<T>(lista: T[]): T[] {
   return kopio;
 }
 
-export function rakennaKysymysPino(kappale: Kappale, maara?: number): Kysymys[] {
-  const teksti: Kysymys[] = kappale.tekstiKysymykset.map((k) => ({ tyyppi: 'teksti', ...k }));
-  const kuva: Kysymys[] = kappale.kuvaKysymykset.map((k) => ({ tyyppi: 'kuva', ...k }));
-  const kaikki = sekoita([...teksti, ...kuva]);
-  return maara ? kaikki.slice(0, maara) : kaikki;
+export interface KysymysLahde {
+  aine: string;
+  kappale: string;
+}
+
+/** Kysymyksen id -> mistä valitusta kappaleesta se on peräisin. Tarvitaan kun
+ * pelaaja valitsee useamman kappaleen kerralla (esim. laajempi koealue) -
+ * jokainen vastaustapahtuma pitää silti kirjata OIKEALLE aine/kappale-parille
+ * vanhemman dashboardin per-kappale-tilastoja varten, ei sille mikä tahansa
+ * yksi kappaleista olisi "valittu". */
+export type KysymysLahteet = Record<string, KysymysLahde>;
+
+/** Rakentaa sekoitetun kysymyspinon yhdestä TAI USEAMMASTA kappaleesta.
+ * Palauttaa myös lähdetiedot per kysymys-id. */
+export function rakennaKysymysPino(
+  kappaleet: Kappale[],
+  maara?: number,
+): { pino: Kysymys[]; lahteet: KysymysLahteet } {
+  const kaikki: Kysymys[] = [];
+  const lahteet: KysymysLahteet = {};
+  for (const kappale of kappaleet) {
+    for (const k of kappale.tekstiKysymykset) {
+      kaikki.push({ tyyppi: 'teksti', ...k });
+      lahteet[k.id] = { aine: kappale.aine, kappale: kappale.kappale };
+    }
+    for (const k of kappale.kuvaKysymykset) {
+      kaikki.push({ tyyppi: 'kuva', ...k });
+      lahteet[k.id] = { aine: kappale.aine, kappale: kappale.kappale };
+    }
+  }
+  const sekoitettu = sekoita(kaikki);
+  return { pino: maara ? sekoitettu.slice(0, maara) : sekoitettu, lahteet };
 }
 
 export interface Vaihtoehto {
