@@ -8,10 +8,12 @@ import { BIOLOGIA_KAPPALEET } from './aineet/biologia';
 import { RUOTSI_KAPPALEET } from './aineet/ruotsi';
 import { USKONTO_KAPPALEET } from './aineet/uskonto';
 import { TERVEYSTIETO_KAPPALEET } from './aineet/terveystieto';
+import { FYSIIKKA_KAPPALEET } from './aineet/fysiikka';
 
 export const REAL_KAPPALEET: Kappale[] = [
   ...BIOLOGIA_KAPPALEET,
   ...RUOTSI_KAPPALEET,
   ...USKONTO_KAPPALEET,
   ...TERVEYSTIETO_KAPPALEET,
+  ...FYSIIKKA_KAPPALEET,
 ];
